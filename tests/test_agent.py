@@ -67,3 +67,26 @@ with tempfile.TemporaryDirectory() as d:
     assert sum(l["typ"] == "narzedzie" for l in log) == 2 and sum(l["typ"] == "kandydat" for l in log) == 2
 
 print("ok")
+
+
+# przerwany przebieg zostawia w logu "koniec" z błędem
+class PsujacaRozmowa:
+    def __init__(self, *a):
+        pass
+
+    def krok(self, tekst=None, wyniki=None):
+        raise RuntimeError("hermes:x: HTTP 502: proxy nie odpowiada")
+
+
+agent.Rozmowa = PsujacaRozmowa
+with tempfile.TemporaryDirectory() as d:
+    try:
+        agent.Odkrywanie(Path(d), k, p).uruchom()
+    except RuntimeError:
+        pass
+    else:
+        raise AssertionError("błąd modelu został połknięty")
+    ostatni = json.loads(open(Path(d) / "log.jsonl", encoding="utf-8").readlines()[-1])
+    assert ostatni["typ"] == "koniec" and "HTTP 502" in ostatni["blad"], ostatni
+
+print("ok (błędy)")

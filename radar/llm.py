@@ -43,7 +43,8 @@ def _openai(dostawca: str, cialo: dict) -> dict:
         if odp.status_code != 429 or proba == 3:
             break
         time.sleep(float(odp.headers.get("retry-after", 30)))
-    odp.raise_for_status()
+    if odp.is_error:  # treść błędu z proxy/dostawcy trafia do logu przebiegu
+        raise RuntimeError(f"{dostawca}:{cialo['model']}: HTTP {odp.status_code}: {odp.text[:500]}")
     wybor = odp.json()["choices"][0]
     if wybor["finish_reason"] not in ("stop", "tool_calls"):
         raise RuntimeError(f"{dostawca}:{cialo['model']}: odpowiedź przerwana, "

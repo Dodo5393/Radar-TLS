@@ -17,4 +17,4 @@ Zmienne środowiskowe:
 Modele `hermes:*` idą przez lokalne proxy Nous Portal, bez klucza: `hermes proxy start`.
 Model na etap: `modele` w `profil.yaml`.
 
-Testy: `python tests/test_typy.py`, `python tests/test_agent.py`.
+Testy: `python tests/test_typy.py`, `python tests/test_agent.py`, `python tests/test_ocena.py`.

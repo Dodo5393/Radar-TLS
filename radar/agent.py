@@ -190,24 +190,31 @@ class Odkrywanie:
                                produkt=k.produkt.nazwa, problem=k.produkt.problem.strip(),
                                lokalizacje=", ".join(p.lokalizacje), frazy=", ".join(p.frazy_miejsca))
         self.loguj(typ="start", model=model, cel=cel)
-        rozmowa = Rozmowa(model, system, NARZEDZIA)
-        tekst, wywolania = rozmowa.krok(tekst="Zaczynaj.")
-        ponaglono = False
-        for krok in range(MAX_KROKOW):
-            if tekst:
-                self.loguj(typ="model", krok=krok, tekst=tekst)
-            if not wywolania:
-                if len(self.kandydaci) >= cel or ponaglono:
+        krok, blad = 0, None
+        try:
+            rozmowa = Rozmowa(model, system, NARZEDZIA)
+            tekst, wywolania = rozmowa.krok(tekst="Zaczynaj.")
+            ponaglono = False
+            for krok in range(MAX_KROKOW):
+                if tekst:
+                    self.loguj(typ="model", krok=krok, tekst=tekst)
+                if not wywolania:
+                    if len(self.kandydaci) >= cel or ponaglono:
+                        break
+                    ponaglono = True
+                    tekst, wywolania = rozmowa.krok(tekst=f"Masz {len(self.kandydaci)}/{cel}. Szukaj dalej "
+                                                          "innymi frazami lub lokalizacjami, jeśli masz pomysły.")
+                    continue
+                wyniki = [self.wykonaj(w) for w in wywolania]
+                if len(self.kandydaci) >= cel:
                     break
-                ponaglono = True
-                tekst, wywolania = rozmowa.krok(tekst=f"Masz {len(self.kandydaci)}/{cel}. Szukaj dalej "
-                                                      "innymi frazami lub lokalizacjami, jeśli masz pomysły.")
-                continue
-            wyniki = [self.wykonaj(w) for w in wywolania]
-            if len(self.kandydaci) >= cel:
-                break
-            tekst, wywolania = rozmowa.krok(wyniki=wyniki)
-        self.loguj(typ="koniec", kandydatow=len(self.kandydaci), krokow=krok + 1)
+                tekst, wywolania = rozmowa.krok(wyniki=wyniki)
+        except BaseException as e:  # także Ctrl+C — log ma pokazać, czemu przebieg się urwał
+            blad = f"{type(e).__name__}: {e}"
+            raise
+        finally:
+            self.loguj(typ="koniec", kandydatow=len(self.kandydaci), krokow=krok + 1,
+                       **({"blad": blad} if blad else {}))
         return self.kandydaci
 
 
