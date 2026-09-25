@@ -76,4 +76,19 @@ with tempfile.TemporaryDirectory() as d:
     assert len(wywolan) == 1
     assert list(csv.DictReader(open(d / "wynik.csv", encoding="utf-8-sig")))[0]["nazwa"] == "Alfa"
 
+    # limit modelu (429 na długo): przebieg się zatrzymuje, wynik.csv z tym, co gotowe
+    from radar.llm import LimitModelu
+    STRONY["https://beta.pl/"] = "<p>Beta Log</p>"
+
+    def limit(model, prompt, schemat):
+        raise LimitModelu("hermes:x: limit zapytań (HTTP 429), retry-after 3600 s")
+
+    ekstrakcja.json_wg_schematu = limit
+    with open(d / "kandydaci.csv", "a", encoding="utf-8-sig", newline="") as f:
+        csv.DictWriter(f, fieldnames=list(Firma.model_fields)).writerows(
+            [Firma(nazwa=n, www=f"https://{n.lower()}.pl/", zrodlo="t").model_dump() for n in ("Beta", "Gamma")])
+    wiersze = kwalifikuj(d)
+    assert [w["nazwa"] for w in wiersze] == ["Alfa", "Bez WWW"], wiersze  # Beta i Gamma na następny raz
+    assert not any(l.startswith('{"firma":"Beta"') for l in open(d / "fakty.jsonl", encoding="utf-8"))
+
 print("ok")

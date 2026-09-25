@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 import time
 from dataclasses import dataclass
 from typing import TypeVar
@@ -18,6 +19,12 @@ import httpx
 from pydantic import BaseModel
 
 T = TypeVar("T", bound=BaseModel)
+
+MAX_CZEKANIA_S = 300  # dłuższy retry-after = wyczerpany limit; przerywamy zamiast spać godzinami
+
+
+class LimitModelu(RuntimeError):
+    """Dostawca odmawia (429) na dłużej niż MAX_CZEKANIA_S — nie ma sensu ciągnąć przebiegu."""
 
 # nazwa -> (base_url, zmienna z kluczem API lub None)
 DOSTAWCY_OPENAI = {
@@ -40,9 +47,18 @@ def _openai(dostawca: str, cialo: dict) -> dict:
     for proba in range(4):
         odp = httpx.post(f"{url}/chat/completions", headers={"Authorization": f"Bearer {klucz}"},
                          json=cialo, timeout=600)
-        if odp.status_code != 429 or proba == 3:
+        if odp.status_code != 429:
             break
-        time.sleep(float(odp.headers.get("retry-after", 30)))
+        try:
+            czekaj = float(odp.headers.get("retry-after", 30))
+        except ValueError:  # retry-after jako data HTTP
+            czekaj = 30.0
+        if czekaj > MAX_CZEKANIA_S or proba == 3:
+            raise LimitModelu(f"{dostawca}:{cialo['model']}: limit zapytań (HTTP 429), "
+                              f"retry-after {czekaj:.0f} s: {odp.text[:300]}")
+        print(f"    limit modelu (HTTP 429), czekam {czekaj:.0f} s, próba {proba + 1}/3",
+              file=sys.stderr, flush=True)
+        time.sleep(czekaj)
     if odp.is_error:  # treść błędu z proxy/dostawcy trafia do logu przebiegu
         raise RuntimeError(f"{dostawca}:{cialo['model']}: HTTP {odp.status_code}: {odp.text[:500]}")
     wybor = odp.json()["choices"][0]

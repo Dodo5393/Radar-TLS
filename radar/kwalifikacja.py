@@ -12,6 +12,7 @@ import csv
 import sys
 from pathlib import Path
 
+from radar.llm import LimitModelu
 from radar.narzedzia.ekstrakcja import wyciagnij_fakty
 from radar.narzedzia.ocena import ocen
 from radar.narzedzia.pobieranie import pobierz_strony
@@ -45,10 +46,11 @@ def kwalifikuj(katalog: Path) -> list[dict]:
             fakty = Fakty.model_validate_json(linia)
             znane[fakty.firma] = fakty
 
-    wiersze = []
+    wiersze, przerwano = [], None
     for i, firma in enumerate(firmy, 1):
         uwagi, fakty = "", znane.get(firma.nazwa)
         if fakty is None:
+            print(f"[{i}/{len(firmy)}] {firma.nazwa}: strony i fakty...", flush=True)
             try:
                 strony = pobierz_strony(firma, profil.podstrony)
                 if strony:
@@ -58,6 +60,9 @@ def kwalifikuj(katalog: Path) -> list[dict]:
                         f.write(fakty.model_dump_json() + "\n")
                 else:  # nie zapisujemy — przy następnym przebiegu spróbujemy znowu
                     uwagi = "brak www" if not firma.www else "strona niedostępna"
+            except LimitModelu as e:  # następne firmy też by nie przeszły
+                przerwano = str(e)
+                break
             except Exception as e:  # jedna firma nie zatrzymuje całej listy
                 uwagi = f"błąd: {type(e).__name__}: {e}"[:300]
         fakty = fakty or Fakty(firma=firma.nazwa)
@@ -65,6 +70,9 @@ def kwalifikuj(katalog: Path) -> list[dict]:
         print(f"[{i}/{len(firmy)}] {ocena.suma:+6.0f}  {firma.nazwa}  {uwagi}")
         wiersze.append(_wiersz(firma, fakty, ocena, profil, uwagi))
 
+    if przerwano:
+        print(f"PRZERWANO na {i}/{len(firmy)}: {przerwano}")
+        print("Gotowe fakty są w fakty.jsonl — uruchom ponownie później, gotowe firmy pominie.")
     wiersze.sort(key=lambda w: -w["suma"])
     with open(katalog / "wynik.csv", "w", encoding="utf-8-sig", newline="") as f:
         w = csv.DictWriter(f, fieldnames=list(wiersze[0]) if wiersze else ["nazwa"])
