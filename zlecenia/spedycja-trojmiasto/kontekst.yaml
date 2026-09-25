@@ -1,0 +1,18 @@
+kogo_szukamy: >
+  Firmy spedycyjne i logistyczne z Trójmiasta, które organizują transport i odprawy
+  dla klientów i na co dzień przyjmują dużo dokumentów od przewoźników, klientów
+  i agencji celnych.
+produkt:
+  nazwa: Automatyzacja obiegu dokumentów przychodzących
+  opis: >
+    Odczytuje dokumenty przychodzące mailem i w skanach (faktury kosztowe przewoźników,
+    CMR, listy przewozowe, dokumenty celne, zlecenia), wyciąga z nich dane, dopasowuje
+    do zleceń i przekazuje do systemu spedycyjnego lub księgowego.
+  problem: >
+    Ręczne przepisywanie i rozpisywanie dużej liczby dokumentów przychodzących,
+    opóźnienia w rozliczeniu zleceń i fakturowaniu, błędy przy dopasowaniu kosztów
+    do zleceń.
+obszar: Trójmiasto (Gdańsk, Gdynia, Sopot i okolice)
+pracownicy_min: 20
+pracownicy_max: 300
+ile_kandydatow: 30

@@ -1,0 +1,5 @@
+anthropic
+httpx
+pydantic>=2
+PyYAML
+beautifulsoup4
