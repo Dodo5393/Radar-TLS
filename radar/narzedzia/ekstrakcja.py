@@ -64,5 +64,6 @@ def wyciagnij_fakty(strony: list[Strona], schemat: dict, model: str) -> Fakty:
             continue
         url = _gdzie_cytat(f.cytat, teksty, f.url)
         # bez potwierdzonego cytatu wartość przepada (typy.Fakt), klucz zostaje: model coś twierdził
-        pola[nazwa] = Fakt(wartosc=f.wartosc, dowod=Dowod(cytat=f.cytat, url=url) if url else None)
+        pola[nazwa] = (Fakt(wartosc=f.wartosc, dowod=Dowod(cytat=f.cytat, url=url)) if url
+                       else Fakt(odrzucony_cytat=f.cytat))
     return Fakty(strony=list(teksty), pola=pola)

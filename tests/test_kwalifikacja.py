@@ -16,7 +16,9 @@ from radar.typy import Firma, Strona
 
 STRONY = {
     "https://alfa.pl/": "<p>Alfa Spedycja</p><a href='/o-nas'>O nas</a><a href='/dla-przewoznikow'>Dla "
-                        "przewoźników</a><a href='/blog/wpis'>Blog</a><a href='https://obca.pl/kariera'>X</a>",
+                        "przewoźników</a><a href='/blog/wpis'>Blog</a><a href='https://obca.pl/kariera'>X</a>"
+                        "<a href='/dla-przewoznikow/?form=open'>Formularz</a>"
+                        "<a href='/umowa-przewoznika.pdf'>Umowa dla przewoźników</a>",
     "https://alfa.pl/o-nas": "<p>Zatrudniamy 120 osób w trzech oddziałach.</p>",
     "https://alfa.pl/dla-przewoznikow": "<p>Fakturę wraz z oryginałem CMR prosimy przesłać na adres biura.</p>",
 }
@@ -36,7 +38,7 @@ pobieranie.pobierz = falszywe_pobierz
 strony = pobieranie.pobierz_strony(Firma(nazwa="Alfa", www="https://alfa.pl/?utm_source=x", zrodlo="t"),
                                    ["przewoźnik"])
 assert {s.url for s in strony} == set(STRONY), [s.url for s in strony]
-assert not any("blog" in u or "obca" in u for u in pobrane)
+assert not any("blog" in u or "obca" in u or ".pdf" in u or "form=" in u for u in pobrane), pobrane
 
 wywolan = []
 
@@ -68,6 +70,8 @@ with tempfile.TemporaryDirectory() as d:
     alfa, bez = wiersze
     assert alfa["nazwa"] == "Alfa" and alfa["suma"] == 25, alfa  # instrukcja +25; celne zmyślone -> 0
     assert alfa["fakt_liczba_pracownikow"] == 120 and alfa["fakt_uslugi_celne"] == ""
+    zapisane = ekstrakcja.Fakty.model_validate_json(open(d / "fakty.jsonl", encoding="utf-8").readline())
+    assert zapisane.pola["uslugi_celne"].odrzucony_cytat == "świadczymy pełną obsługę celną"
     assert "https://alfa.pl/o-nas" in alfa["dowody"] or "instrukcja" in alfa["dowody"]
     assert bez["uwagi"] == "brak www" and bez["suma"] == 0
     assert len(wywolan) == 1

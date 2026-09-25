@@ -142,6 +142,7 @@ class Dowod(BaseModel):
 class Fakt(BaseModel):
     wartosc: str | float | bool | list[str] | None = None
     dowod: Dowod | None = None
+    odrzucony_cytat: str | None = None  # cytat modelu, którego nie ma na stronie — do pomiaru
 
     @model_validator(mode="after")
     def _bez_dowodu_brak(self):

@@ -23,6 +23,7 @@ MAX_PODSTRON = 5
 # ogólne nazwy podstron; słowa specyficzne dla zlecenia są w profil.podstrony
 PODSTRONY_OGOLNE = ["o nas", "o firmie", "about", "kariera", "praca", "career", "jobs",
                     "kontakt", "contact", "oferta", "uslugi"]
+PLIKI = re.compile(r"\.(pdf|docx?|xlsx?|pptx?|zip|rar|jpe?g|png|gif|webp|svg|mp4)$", re.I)
 ODSTEP_S = 2.0  # minimalny odstęp między zapytaniami do jednego hosta
 _ostatnio: dict[str, float] = {}
 
@@ -106,31 +107,39 @@ def tekst_i_linki(strona: Strona) -> tuple[str, list[tuple[str, str]]]:
     return soup.get_text(" ", strip=True), [(u, t) for u, t in linki.items() if u.startswith("http")]
 
 
+def _klucz(url: str) -> str:
+    """Jedna podstrona = jeden klucz: bez www, ?zapytania i końcowego /."""
+    return f"{domena(url)}{urlsplit(url).path.rstrip('/')}"
+
+
 def pobierz_strony(firma: Firma, podstrony: list[str] = ()) -> list[Strona]:
-    """Strona główna, adres z Places i do MAX_PODSTRON podstron, których link pasuje do słów."""
+    """Strona główna, adres z Places i do MAX_PODSTRON podstron HTML, których link pasuje do słów."""
     if not firma.www:
         return []
     www = firma.www if "//" in firma.www else f"https://{firma.www}"
     cz = urlsplit(www)
-    start = [f"{cz.scheme}://{cz.netloc}/", f"{cz.scheme}://{cz.netloc}{cz.path or '/'}"]  # bez ?utm_...
-    strony = {}
-    for url in dict.fromkeys(start):
+    strony: dict[str, Strona] = {}
+
+    def dodaj(url: str) -> None:
         try:
-            strony[url] = pobierz(url)
+            s = pobierz(url)
         except Exception:  # robots, timeout, DNS — firma zostaje z tym, co się udało
-            pass
+            return
+        if s.status == 200 and "html" in s.typ:  # PDF-y i obrazki to śmieci w prompcie
+            strony.setdefault(_klucz(s.url), s)  # po przekierowaniu może to być już znana strona
+
+    for url in dict.fromkeys([f"{cz.scheme}://{cz.netloc}/", f"{cz.scheme}://{cz.netloc}{cz.path or '/'}"]):
+        dodaj(url)
     klucze = [_ascii(k) for k in [*PODSTRONY_OGOLNE, *podstrony]]
-    kandydaci = {}
+    kandydaci: dict[str, tuple[int, str]] = {}
     for s in list(strony.values()):
         for url, opis in tekst_i_linki(s)[1]:
-            if domena(url) != domena(www) or url in strony:
+            k, sciezka = _klucz(url), urlsplit(url).path
+            if domena(url) != domena(www) or k in strony or PLIKI.search(sciezka):
                 continue
-            tekst = _ascii(f"{urlsplit(url).path} {opis}")
-            if trafien := sum(k in tekst for k in klucze):
-                kandydaci[url] = max(kandydaci.get(url, 0), trafien)
-    for url in sorted(kandydaci, key=lambda u: (-kandydaci[u], len(u)))[:MAX_PODSTRON]:
-        try:
-            strony[url] = pobierz(url)
-        except Exception:
-            pass
-    return [s for s in strony.values() if s.status == 200]
+            trafien = sum(kl in _ascii(f"{sciezka} {opis}") for kl in klucze)
+            if trafien > kandydaci.get(k, (0, ""))[0]:  # przy remisie zostaje pierwszy widziany adres
+                kandydaci[k] = (trafien, url.split("?")[0])
+    for _, url in sorted(kandydaci.values(), key=lambda t: (-t[0], len(t[1])))[:MAX_PODSTRON]:
+        dodaj(url)
+    return list(strony.values())

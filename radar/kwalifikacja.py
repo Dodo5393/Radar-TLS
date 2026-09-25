@@ -22,6 +22,8 @@ from radar.typy import Fakty, Firma, Ocena, Profil
 
 def _wiersz(firma: Firma, fakty: Fakty, ocena: Ocena, profil: Profil, uwagi: str) -> dict:
     def tekst(w):
+        if isinstance(w, float) and w.is_integer():
+            return int(w)  # 140, nie 140.0
         return "; ".join(map(str, w)) if isinstance(w, list) else ("" if w is None else w)
 
     return {
