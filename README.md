@@ -14,6 +14,7 @@ Zmienne środowiskowe:
 - `RADAR_KONTAKT` — e-mail do User-Agent (wymagane przy pobieraniu stron)
 - `GOOGLE_PLACES_API_KEY` — Places API (New)
 - `ANTHROPIC_API_KEY` — dla modeli `anthropic:*`
+- `OPENROUTER_API_KEY` — dla modeli `openrouter:*` (np. `openrouter:anthropic/claude-haiku-4.5`)
 
 Modele `hermes:*` idą przez lokalne proxy Nous Portal, bez klucza: `hermes proxy start`.
 Model na etap: `modele` w `profil.yaml`.

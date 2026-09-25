@@ -2,6 +2,7 @@
 
     anthropic:claude-opus-5
     hermes:upstage/solar-pro4:free     # lokalne proxy Hermesa (`hermes proxy start`), bez klucza API
+    openrouter:anthropic/claude-haiku-4.5
 
 Dostawcy inni niż anthropic mówią API zgodnym z OpenAI (chat/completions).
 """
@@ -26,9 +27,11 @@ MAX_CZEKANIA_S = 300  # dłuższy retry-after = wyczerpany limit; przerywamy zam
 class LimitModelu(RuntimeError):
     """Dostawca odmawia (429) na dłużej niż MAX_CZEKANIA_S — nie ma sensu ciągnąć przebiegu."""
 
-# nazwa -> (base_url, zmienna z kluczem API lub None)
+# nazwa -> (base_url, zmienna z kluczem API lub None, pola dodawane do każdego zapytania)
 DOSTAWCY_OPENAI = {
-    "hermes": ("http://127.0.0.1:8645/v1", None),  # proxy dokleja poświadczenia Nous Portal
+    "hermes": ("http://127.0.0.1:8645/v1", None, {}),  # proxy dokleja poświadczenia Nous Portal
+    # require_parameters: tylko dostawcy obsługujący tools / json_schema, bez cichego pominięcia
+    "openrouter": ("https://openrouter.ai/api/v1", "OPENROUTER_API_KEY", {"provider": {"require_parameters": True}}),
 }
 
 
@@ -42,11 +45,13 @@ def _rozbij(model: str) -> tuple[str, str]:
 
 def _openai(dostawca: str, cialo: dict) -> dict:
     """POST chat/completions; zwraca choices[0]. Ponawia 429 (darmowe modele)."""
-    url, klucz_env = DOSTAWCY_OPENAI[dostawca]
-    klucz = os.environ[klucz_env] if klucz_env else "brak"
+    url, klucz_env, dodatki = DOSTAWCY_OPENAI[dostawca]
+    klucz = os.environ.get(klucz_env, "") if klucz_env else "brak"
+    if not klucz:
+        raise RuntimeError(f"Ustaw {klucz_env} dla modeli {dostawca}:*")
     for proba in range(4):
         odp = httpx.post(f"{url}/chat/completions", headers={"Authorization": f"Bearer {klucz}"},
-                         json=cialo, timeout=600)
+                         json={**dodatki, **cialo}, timeout=600)
         if odp.status_code != 429:
             break
         try:
