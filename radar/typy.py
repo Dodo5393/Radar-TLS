@@ -105,6 +105,7 @@ class Firma(BaseModel):
     telefon: str | None = None
     nip: str | None = None
     krs: str | None = None
+    place_id: str | None = None
     zrodlo: str  # narzędzie + zapytanie, np. "szukaj_miejsca:spedycja|Gdynia"
     zrodlo_url: str | None = None  # konkretna strona/rekord, z którego pochodzi
 
