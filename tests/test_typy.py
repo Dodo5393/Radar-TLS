@@ -17,7 +17,9 @@ baza = dict(lokalizacje=[], frazy_miejsca=[], frazy_web=[], pkd=[], modele={},
             schemat={"pracownicy": {"typ": "liczba", "opis": "x"}})
 Profil(**baza, reguly={"duza": {"fakt": "pracownicy", "warunek": ">=", "wartosc": 20, "punkty": 10, "uzasadnienie": "x"}})
 for zla in ({"fakt": "brak", "warunek": "prawda", "punkty": 1, "uzasadnienie": "x"},
-            {"fakt": "pracownicy", "warunek": ">=", "punkty": 1, "uzasadnienie": "x"}):
+            {"fakt": "pracownicy", "warunek": ">=", "punkty": 1, "uzasadnienie": "x"},
+            {"fakt": "pracownicy", "warunek": "prawda", "punkty": 1, "uzasadnienie": "x"},
+            {"fakt": "pracownicy", "warunek": "wypelniony", "wartosc": 5, "punkty": 1, "uzasadnienie": "x"}):
     try:
         Profil(**baza, reguly={"r": zla})
     except ValidationError:

@@ -33,10 +33,18 @@ class PoleSchematu(BaseModel):
 
 class Regula(BaseModel):
     fakt: str  # klucz z profil.schemat
-    warunek: Literal["prawda", "wypelniony", ">=", "<=", "zawiera"]
-    wartosc: str | float | None = None  # dla >=, <=, zawiera
+    warunek: Literal["prawda", "falsz", "wypelniony", ">=", "<=", "zawiera"]
+    wartosc: str | float | None = None  # tylko dla >=, <=, zawiera
     punkty: float  # ujemne = sygnał przeciw
     uzasadnienie: str  # jaki związek z problemem, który rozwiązuje produkt
+
+
+WARUNKI_DLA_TYPU = {
+    "tak_nie": {"prawda", "falsz", "wypelniony"},
+    "liczba": {">=", "<=", "wypelniony"},
+    "tekst": {"zawiera", "wypelniony"},
+    "lista": {"zawiera", "wypelniony"},
+}
 
 
 class Profil(BaseModel):
@@ -53,8 +61,11 @@ class Profil(BaseModel):
         for id_, r in self.reguly.items():
             if r.fakt not in self.schemat:
                 raise ValueError(f"reguła {id_!r} odwołuje się do nieznanego faktu {r.fakt!r}")
-            if r.warunek in (">=", "<=", "zawiera") and r.wartosc is None:
-                raise ValueError(f"reguła {id_!r}: warunek {r.warunek!r} wymaga wartości")
+            typ = self.schemat[r.fakt].typ
+            if r.warunek not in WARUNKI_DLA_TYPU[typ]:
+                raise ValueError(f"reguła {id_!r}: warunek {r.warunek!r} nie pasuje do faktu typu {typ!r}")
+            if (r.wartosc is None) != (r.warunek in ("prawda", "falsz", "wypelniony")):
+                raise ValueError(f"reguła {id_!r}: wartość podaje się tylko dla >=, <=, zawiera")
         return self
 
 

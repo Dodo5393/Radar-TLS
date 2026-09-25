@@ -1,0 +1,205 @@
+# Wygenerowano 2026-09-25 modelem hermes:stepfun/step-3.7-flash:free z kontekst.yaml.
+# Plik do ręcznej korekty. Kolejne etapy czytają go bez zmian.
+
+lokalizacje:
+- Gdańsk
+- Gdynia
+- Sopot
+- Pruszcz Gdański
+- Kolbudy
+- Trąbki Wielkie
+- Rumia
+- Reda
+- Wejherowo
+- Kartuzy
+- Puck
+- Tczew
+- Malbork
+frazy_miejsca:
+- spedycja drogowa
+- logistyka transportowa
+- usługi spedycyjne
+- firma spedycyjna
+- odprawa celna
+- transport międzynarodowy
+- logistyka magazynowa
+- firma logistyczna
+- usługi celne
+- transport krajowy
+- przewóz towarów
+- logistyka dla firm
+- CMR obsługa
+- obsługa przewozów
+- kontrola celna
+frazy_web:
+- katalog firm spedycyjnych Trójmiasto
+- lista firm logistycznych Gdańsk
+- członkowie izby spedycyjnej Pomorze
+- ranking spedycji Trójmiasto 2024
+- katalog usług celnych Gdańsk
+- wystawcy targów transportowych Trójmiasto
+- członkowie klastra logistycznego Pomorze
+- lista przewoźników Gdynia
+- katalog spedycji drogowej Trójmiasto
+- lista firm odpraw celnych Gdańsk
+- ranking firm logistycznych Pomorze
+- członkowie stowarzyszenia spedycyjnego Pomorze
+- lista firm z obsługą CMR Trójmiasto
+- katalog logistyków Pruszcz Gdański
+pkd:
+- 52.10.Z
+- 52.24.Z
+- 52.29.C
+- 53.20.Z
+schemat:
+  liczba_pracowników:
+    typ: liczba
+    opis: 'Liczba pracowników firmy podana na stronie, rozpoznawana po sformułowaniach typu „zatrudniamy
+      X pracowników”, „zespół liczy X osób”, „w firmie pracuje X pracowników”, „liczba pracowników: X”'
+  zakres_uslug_spedycja:
+    typ: tekst
+    opis: Informacja o świadczeniu usług spedycyjnych, rozpoznawana po sformułowaniach „organizujemy transport
+      towarowy”, „świadczymy usługi spedycyjne”, „zajmujemy się spedycją”
+  uslugi_celne:
+    typ: tak_nie
+    opis: Informacja o świadczeniu usług celnych (odprawa celna, obsługa celna importu/eksportu), rozpoznawana
+      po sformułowaniach „świadczymy usługi celne”, „odprawy celne”, „obsługa celna”
+  liczba_dokumentow_dziennie:
+    typ: liczba
+    opis: Liczba dokumentów przetwarzanych dziennie, rozpoznawana po sformułowaniach „przetwarzamy X dokumentów
+      dziennie”, „codziennie obsługujemy X faktur/CMR”, „przepisujemy X dokumentów tygodniowo” (wartość
+      tygodniowa konwertowana na dzienną przez podzielenie przez 5)
+  obecne_oprogramowanie_spedycyjne:
+    typ: lista
+    opis: Wymienione systemy spedycyjne używane przez firmę, rozpoznawane po sformułowaniach „używamy
+      systemu [nazwa]”, „pracujemy w systemie [nazwa]”, „nasze oprogramowanie do spedycji to [nazwa]”
+  obecne_oprogramowanie_ksiegowe:
+    typ: lista
+    opis: Wymienione systemy księgowe używane przez firmę, rozpoznawane po sformułowaniach „fakturowanie
+      w systemie [nazwa]”, „księgowość prowadzona w [nazwa]”, „pracujemy z programem [nazwa] do księgowości”
+  manualne_przepisywanie_dokumentow:
+    typ: tak_nie
+    opis: Wyraźna informacja o ręcznym przepisywaniu lub weryfikacji dokumentów, rozpoznawana po sformułowaniach
+      „ręcznie przepisujemy dane z dokumentów”, „weryfikujemy faktury ręcznie”, „dane z CMR wpisujemy
+      do systemu samodzielnie”
+  liczba_zlecen_miesiecznie:
+    typ: liczba
+    opis: Liczba zleceń transportowych obsługiwanych miesięcznie, rozpoznawana po sformułowaniach „obsługujemy
+      X zleceń miesięcznie”, „miesięcznie realizujemy X przewozów”, „prowadzimy X zleceń rocznie” (wartość
+      roczna konwertowana na miesięczną przez podzielenie przez 12)
+  bledy_dopasowania_kosztow:
+    typ: tak_nie
+    opis: Informacja o błędach przy dopasowywaniu kosztów do zleceń, rozpoznawana po sformułowaniach „mamy
+      problem z dopasowaniem kosztów przewoźników do zleceń”, „często popełniamy błędy przy przypisywaniu
+      faktur kosztowych”
+  opoznienia_w_rozliczeniach:
+    typ: tak_nie
+    opis: Informacja o opóźnieniach w rozliczeniach z przewoźnikami lub fakturowaniu dla klientów, rozpoznawana
+      po sformułowaniach „mamy opóźnienia w rozliczeniach z przewoźnikami”, „fakturowanie klientów opóźnia
+      się z powodu dokumentów”
+  brak_automatyzacji_dokumentow:
+    typ: tak_nie
+    opis: Wyraźna informacja o braku automatyzacji obiegu dokumentów przychodzących, rozpoznawana po sformułowaniach
+      „nie mamy automatyzacji obiegu dokumentów”, „wszystkie dokumenty przepisujemy ręcznie”, „nie korzystamy
+      z narzędzi do ekstrakcji danych z dokumentów”
+  integracja_z_systemami:
+    typ: lista
+    opis: Wymienione systemy, z którymi firma chce integrować narzędzia, rozpoznawana po sformułowaniach
+      „integracja z systemem [nazwa]”, „chcemy połączyć narzędzie z naszym oprogramowaniem do spedycji/księgowości”
+reguly:
+  manualne_przepisywanie:
+    fakt: manualne_przepisywanie_dokumentow
+    warunek: prawda
+    wartosc: null
+    punkty: 20.0
+    uzasadnienie: Ręczne przepisywanie dokumentów jest podstawowym problemem rozwiązywanym przez produkt,
+      a jego obecność potwierdza potrzebę wdrożenia automatyzacji.
+  wysoka_liczba_dokumentow:
+    fakt: liczba_dokumentow_dziennie
+    warunek: '>='
+    wartosc: 50.0
+    punkty: 15.0
+    uzasadnienie: Firma przetwarzająca co najmniej 50 dokumentów dziennie ma wystarczająco dużą skalę
+      problemu, aby automatyzacja była dla niej opłacalna.
+  wysoka_liczba_zlecen:
+    fakt: liczba_zlecen_miesiecznie
+    warunek: '>='
+    wartosc: 200.0
+    punkty: 10.0
+    uzasadnienie: Wysoka liczba miesięcznych zleceń oznacza dużą liczbę kosztów do dopasowania, co zwiększa
+      ryzyko błędów i opóźnień rozliczeń.
+  bledy_dopasowania_kosztow:
+    fakt: bledy_dopasowania_kosztow
+    warunek: prawda
+    wartosc: null
+    punkty: 15.0
+    uzasadnienie: Błędy przy dopasowywaniu kosztów do zleceń generują dodatkowe koszty i opóźnienia, co
+      jest bezpośrednio rozwiązywane przez produkt.
+  opoznienia_w_rozliczeniach:
+    fakt: opoznienia_w_rozliczeniach
+    warunek: prawda
+    wartosc: null
+    punkty: 10.0
+    uzasadnienie: Opóźnienia w rozliczeniach i fakturowaniu wpływają na płynność finansową firmy, a automatyzacja
+      dokumentów je eliminuje.
+  brak_automatyzacji:
+    fakt: brak_automatyzacji_dokumentow
+    warunek: prawda
+    wartosc: null
+    punkty: 15.0
+    uzasadnienie: Brak jakiejkolwiek automatyzacji obiegu dokumentów oznacza, że produkt wypełni całkowicie
+      lukę w procesach firmy.
+  uslugi_celne:
+    fakt: uslugi_celne
+    warunek: prawda
+    wartosc: null
+    punkty: 5.0
+    uzasadnienie: Firmy świadczące usługi celne przetwarzają dużą liczbę specyficznych dokumentów, które
+      produkt obsługuje, co zwiększa jego wartość dla nich.
+  integracja_z_systemem_spedycyjnym:
+    fakt: integracja_z_systemami
+    warunek: zawiera
+    wartosc: system spedycyjny
+    punkty: 5.0
+    uzasadnienie: Firma posiadająca system spedycyjny i chcąca z nim integrować narzędzie ma jasno określone
+      potrzeby, które produkt spełnia.
+  za_mala_firma:
+    fakt: liczba_pracowników
+    warunek: <=
+    wartosc: 19.0
+    punkty: -100.0
+    uzasadnienie: Firma poniżej 20 pracowników przetwarza zbyt małą liczbę dokumentów, aby automatyzacja
+      była dla niej opłacalna.
+  za_duza_firma:
+    fakt: liczba_pracowników
+    warunek: '>='
+    wartosc: 301.0
+    punkty: -100.0
+    uzasadnienie: Firma powyżej 300 pracowników prawdopodobnie ma już wdrożoną automatyzację obiegu dokumentów
+      i nie jest w zakresie targetu produktu.
+  ma_automatyzacje:
+    fakt: brak_automatyzacji_dokumentow
+    warunek: falsz
+    wartosc: null
+    punkty: -40.0
+    uzasadnienie: Firma, która nie potwierdza braku automatyzacji, prawdopodobnie ma już rozwiązanie,
+      które eliminuje potrzebę zakupu naszego produktu.
+  niska_liczba_dokumentow:
+    fakt: liczba_dokumentow_dziennie
+    warunek: <=
+    wartosc: 19.0
+    punkty: -20.0
+    uzasadnienie: Firma przetwarzająca mniej niż 20 dokumentów dziennie ma zbyt małą skalę ręcznych operacji,
+      aby automatyzacja przyniosła zauważalne korzyści.
+  niska_liczba_zlecen:
+    fakt: liczba_zlecen_miesiecznie
+    warunek: <=
+    wartosc: 49.0
+    punkty: -20.0
+    uzasadnienie: Firma obsługująca mniej niż 50 zleceń miesięcznie ma zbyt małą skalę problemu z dopasowywaniem
+      kosztów, aby automatyzacja była dla niej opłacalna.
+modele:
+  odkrywanie: hermes:stepfun/step-3.7-flash:free
+  trafnosc: hermes:stepfun/step-3.7-flash:free
+  ekstrakcja: hermes:stepfun/step-3.7-flash:free
+  zaczepka: hermes:stepfun/step-3.7-flash:free
