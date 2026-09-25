@@ -167,7 +167,7 @@ reguly:
     uzasadnienie: Firma już automatyzuje obieg dokumentów przychodzących, więc problem, który rozwiązuje produkt,
       jest u niej rozwiązany.
 modele:
-  odkrywanie: hermes:stepfun/step-3.7-flash:free
-  trafnosc: hermes:stepfun/step-3.7-flash:free
-  ekstrakcja: hermes:stepfun/step-3.7-flash:free
-  zaczepka: hermes:stepfun/step-3.7-flash:free
+  odkrywanie: openrouter:anthropic/claude-sonnet-5
+  trafnosc: openrouter:deepseek/deepseek-v4-flash
+  ekstrakcja: openrouter:anthropic/claude-haiku-4.5
+  zaczepka: openrouter:anthropic/claude-sonnet-5
