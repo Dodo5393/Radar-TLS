@@ -27,4 +27,11 @@ for zla in ({"fakt": "brak", "warunek": "prawda", "punkty": 1, "uzasadnienie": "
     else:
         raise AssertionError(zla)
 
+try:
+    Profil(**{**baza, "schemat": {"liczba_pracowników": {"typ": "liczba", "opis": "x"}}}, reguly={})
+except ValidationError:
+    pass
+else:
+    raise AssertionError("nazwa faktu spoza ASCII przeszła")
+
 print("ok")

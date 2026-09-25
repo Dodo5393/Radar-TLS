@@ -58,6 +58,9 @@ class Profil(BaseModel):
 
     @model_validator(mode="after")
     def _reguly_wskazuja_istniejace_fakty(self):
+        for nazwa in self.schemat:
+            if not (nazwa.isascii() and nazwa.isidentifier()):
+                raise ValueError(f"nazwa faktu {nazwa!r}: tylko ASCII, litery, cyfry i _")
         for id_, r in self.reguly.items():
             if r.fakt not in self.schemat:
                 raise ValueError(f"reguła {id_!r} odwołuje się do nieznanego faktu {r.fakt!r}")
