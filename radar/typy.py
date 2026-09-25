@@ -51,6 +51,7 @@ class Profil(BaseModel):
     lokalizacje: list[str]  # obszar rozbity na miejscowości do Places
     frazy_miejsca: list[str]  # krótkie frazy do Google Places
     frazy_web: list[str]  # zapytania do wyszukiwarki (w tym katalogi, izby, targi)
+    podstrony: list[str] = []  # słowa w linkach podstron wartych pobrania przy kwalifikacji
     pkd: list[str]
     schemat: dict[str, PoleSchematu]
     reguly: dict[str, Regula]
@@ -150,7 +151,8 @@ class Fakt(BaseModel):
 
 
 class Fakty(BaseModel):
-    firma: str
+    firma: str = ""
+    strony: list[str] = []  # adresy przeczytane przy ekstrakcji
     pola: dict[str, Fakt] = Field(default_factory=dict)  # klucze z profil.schemat
 
 

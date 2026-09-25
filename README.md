@@ -7,6 +7,7 @@ Znajduje i kwalifikuje potencjalnych klientów na podstawie opisu kontekstu.
     pip install -r requirements.txt
     python -m radar.profil zlecenia/<nazwa> --model anthropic:claude-opus-5   # raz, potem ręczna korekta profil.yaml
     python -m radar.agent zlecenia/<nazwa>                                    # odkrywanie -> kandydaci.csv, log.jsonl
+    python -m radar.kwalifikacja zlecenia/<nazwa>                             # strony -> fakty.jsonl -> wynik.csv
 
 Zmienne środowiskowe:
 
@@ -17,4 +18,4 @@ Zmienne środowiskowe:
 Modele `hermes:*` idą przez lokalne proxy Nous Portal, bez klucza: `hermes proxy start`.
 Model na etap: `modele` w `profil.yaml`.
 
-Testy: `python tests/test_typy.py`, `python tests/test_agent.py`, `python tests/test_ocena.py`.
+Testy: `python tests/test_typy.py`, `python tests/test_agent.py`, `python tests/test_ocena.py`, `python tests/test_kwalifikacja.py`.

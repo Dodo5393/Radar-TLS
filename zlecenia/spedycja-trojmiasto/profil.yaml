@@ -46,6 +46,17 @@ frazy_web:
 - członkowie stowarzyszenia spedycyjnego Pomorze
 - lista firm z obsługą CMR Trójmiasto
 - katalog logistyków Pruszcz Gdański
+podstrony:
+- przewoźnik
+- dla przewoźników
+- współpraca
+- warunki
+- owu
+- faktury
+- dokumenty
+- zlecenia
+- oddziały
+- certyfikaty
 pkd:
 - 52.29.C  # pozostałe agencje transportowe (spedycja)
 - 52.29.A  # morskie agencje transportowe

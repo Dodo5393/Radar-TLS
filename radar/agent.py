@@ -10,16 +10,12 @@ from __future__ import annotations
 
 import csv
 import json
-import re
 import sys
 from datetime import datetime
 from pathlib import Path
-from urllib.parse import urljoin, urlsplit
-
-from bs4 import BeautifulSoup
 
 from radar.llm import Narzedzie, Rozmowa, Wywolanie
-from radar.narzedzia.pobieranie import pobierz
+from radar.narzedzia.pobieranie import domena, pobierz, slowa, tekst_i_linki
 from radar.narzedzia.places import szukaj_miejsca
 from radar.profil import wczytaj_kontekst, wczytaj_profil
 from radar.typy import Firma, Kontekst, Miejsce, Profil
@@ -72,26 +68,6 @@ bez wywoływania narzędzi.
 """
 
 
-def _slowa(tekst: str) -> str:
-    return " ".join(re.findall(r"\w+", tekst.lower()))
-
-
-def _domena(www: str | None) -> str | None:
-    if not www:
-        return None
-    return urlsplit(www if "//" in www else f"//{www}").netloc.lower().removeprefix("www.") or None
-
-
-def _tekst_strony(html: str, url: str) -> tuple[str, list[tuple[str, str]]]:
-    soup = BeautifulSoup(html, "html.parser")
-    for t in soup(["script", "style", "noscript"]):
-        t.decompose()
-    linki = {}
-    for a in soup.find_all("a", href=True):
-        linki.setdefault(urljoin(url, a["href"]), a.get_text(" ", strip=True))
-    return soup.get_text(" ", strip=True), [(u, t) for u, t in linki.items() if u.startswith("http")]
-
-
 class Odkrywanie:
     def __init__(self, katalog: Path, kontekst: Kontekst, profil: Profil):
         self.katalog, self.kontekst, self.profil = katalog, kontekst, profil
@@ -119,7 +95,7 @@ class Odkrywanie:
 
     def t_pobierz(self, url: str) -> str:
         s = pobierz(url)
-        tekst, linki = _tekst_strony(s.tresc, s.url) if "html" in s.typ else (s.tresc, [])
+        tekst, linki = tekst_i_linki(s)
         self.strony[url] = self.strony[s.url] = tekst
         self.loguj(typ="narzedzie", narzedzie="pobierz", url=url, status=s.status, z_cache=s.z_cache,
                    znakow=len(tekst))
@@ -148,15 +124,15 @@ class Odkrywanie:
         nazwa, url = arg.get("nazwa", "").strip(), arg.get("zrodlo_url", "")
         if not nazwa or url not in self.strony:
             return "podaj nazwa i zrodlo_url strony pobranej w tym przebiegu"
-        rdzen = " ".join(_slowa(nazwa).split()[:2])
-        if rdzen not in _slowa(self.strony[url]):
+        rdzen = " ".join(slowa(nazwa).split()[:2])
+        if rdzen not in slowa(self.strony[url]):
             return f"nazwa ({rdzen!r}) nie występuje na stronie {url}"
         return Firma(nazwa=nazwa, www=arg.get("www"), zrodlo=f"pobierz:{url}", zrodlo_url=url)
 
     def zapisz_kandydatow(self, firmy: list[Firma]) -> int:
         dodane = 0
         for f in firmy:
-            klucze = {k for k in (f.place_id, _domena(f.www), _slowa(f.nazwa)) if k}
+            klucze = {k for k in (f.place_id, domena(f.www), slowa(f.nazwa)) if k}
             if klucze & self._klucze:
                 continue
             self._klucze |= klucze

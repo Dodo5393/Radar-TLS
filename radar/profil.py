@@ -53,6 +53,10 @@ frazy_web — 8–15 zapytań do wyszukiwarki nastawionych na LISTY firm, nie po
 katalogi branżowe, izby i stowarzyszenia, listy wystawców targowych, rankingi, członkowie
 klastrów. Z nazwą obszaru tam, gdzie ma to sens.
 
+podstrony — 5–10 słów, po których w linkach lub adresach podstron firmy rozpoznać
+podstrony z faktami ze schematu (np. nazwy zakładek). Ogólne (o nas, kariera, kontakt,
+oferta) są dodawane automatycznie — podaj tylko specyficzne dla tego zlecenia.
+
 pkd — kody PKD (format 52.29.C) typowe dla przeważającej działalności takich firm.
 
 schemat — 6–12 faktów do wyciągnięcia ze strony WWW firmy. Tylko fakty, które da się
@@ -88,6 +92,7 @@ class _Szkic(BaseModel):
     lokalizacje: list[str]
     frazy_miejsca: list[str]
     frazy_web: list[str]
+    podstrony: list[str]
     pkd: list[str]
     schemat: list[_Pole]
     reguly: list[_Regula]
@@ -108,6 +113,7 @@ def generuj_profil(kontekst: Kontekst, model: str = MODEL_PROFILU) -> Profil:
         lokalizacje=s.lokalizacje,
         frazy_miejsca=s.frazy_miejsca,
         frazy_web=s.frazy_web,
+        podstrony=s.podstrony,
         pkd=s.pkd,
         schemat={p.nazwa: PoleSchematu(**p.model_dump(exclude={"nazwa"})) for p in s.schemat},
         reguly={r.id: Regula(**r.model_dump(exclude={"id"})) for r in s.reguly},
